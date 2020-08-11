@@ -2,8 +2,9 @@ package genetic
 
 trait Evolver {
 
-  def run(candidate: String, evaluator: Evaluator, population: Population): Organism = {
+  def run(evaluator: Evaluator, population: Population): Organism = {
 
+    @scala.annotation.tailrec
     def run(pop: Population, generation: Int): Organism = {
       val fittest = evaluator.fittest(pop)
       val fitness = evaluator.fitness(fittest)
@@ -14,7 +15,7 @@ trait Evolver {
         fittest
       else
         run(
-          pop.evolve(true, evaluator),
+          pop.evolve(elitist = true, evaluator),
           generation + 1
         )
     }
@@ -24,14 +25,13 @@ trait Evolver {
 }
 
 object Runner extends App with Evolver {
-  val evaluator = new Evaluator
-  val candidate = "0101010101010101010101010101010101010101010101010101010101010101"
-  evaluator.load(candidate)
+  val candidate = "01" * 32
+  val evaluator = new Evaluator(candidate)
 
-  var population = new Population(50)
-  population.populate
+  val population = new Population(50)
+  population.populate()
 
-  val solution: Organism = run(candidate, evaluator, population)
+  val solution: Organism = run(evaluator, population)
 
   println("\ncandidate:  " + candidate)
   println("solution:   " + solution)
