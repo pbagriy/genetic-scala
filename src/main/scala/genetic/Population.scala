@@ -38,7 +38,7 @@ class Population(val populationSize: Integer) {
     * @param elitist If true, the fittest organism passes to the next generation
     * @param evaluator The evaluator to use
     */
-  def evolve(elitist: Boolean, evaluator: Evaluator): Population = {
+  def evolve(elitist: Boolean, evaluator: Evaluator): Unit = {
     val eliteOrganism = evaluator.fittest(this)
     val nextGeneration = for {
       _       <- 1 until populationSize
@@ -50,7 +50,6 @@ class Population(val populationSize: Integer) {
     population.clear()
     population.addOne(eliteOrganism)
     population.addAll(nextGeneration)
-    this //TODO find a cleaner solution
   }
 
   /**
