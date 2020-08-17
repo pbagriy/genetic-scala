@@ -1,5 +1,8 @@
 package genetic
 
+import java.time.LocalTime
+import java.time.temporal.ChronoUnit
+
 trait Evolver {
 
   def run(evaluator: Evaluator, population: Population): Organism = {
@@ -9,7 +12,7 @@ trait Evolver {
       val fittest = evaluator.fittest(population)
       val fitness = evaluator.fitness(fittest)
 
-      println(f"generation: $generation%02d chromosome: $fittest%s fitness: $fitness%2.2f")
+      println(f"generation: $generation%02d chromosome: $fittest%s fitness: $fitness%2.2f time: ${LocalTime.now}")
 
       if (fitness >= 1.0)
         fittest
@@ -24,14 +27,16 @@ trait Evolver {
 }
 
 object Runner extends App with Evolver {
-  val candidate = "01" * 32
+  val candidate = "This algorithm is awesome, but isn't that great in finding last few symbols"
   val evaluator = new Evaluator(candidate)
 
-  val population = new Population(50)
+  val population = new Population(50, candidate.length)
   population.populate()
 
+  val start = LocalTime.now
   val solution: Organism = run(evaluator, population)
 
   println("\ncandidate:  " + candidate)
   println("solution:   " + solution)
+  println("Total duration: " + ChronoUnit.MILLIS.between(start, LocalTime.now))
 }

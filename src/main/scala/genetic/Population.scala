@@ -3,9 +3,7 @@ package genetic
 import scala.collection.mutable
 import scala.util.Random
 
-class Population(val populationSize: Integer) {
-  val chromosomeSize: Integer = 64
-
+class Population(populationSize: Int, solutionSize: Int) {
   val population: mutable.Buffer[Organism] = mutable.Buffer.empty[Organism]
 
   val mutationRate = 0.015
@@ -17,8 +15,7 @@ class Population(val populationSize: Integer) {
   def populate(): Unit = {
     val organisms = for {
       _     <- 0 until populationSize
-      bytes = IndexedSeq.fill(chromosomeSize)(Math.round(Math.random).toByte)
-    } yield Organism(bytes)
+    } yield Organism.create(solutionSize)
 
     population.addAll(organisms)
   }
@@ -56,8 +53,8 @@ class Population(val populationSize: Integer) {
     * Mutate an organism with a random rate of 0.015
     */
   def mutate(organism: Organism): Organism = {
-    val mutatedChromosome: IndexedSeq[Byte] =
-      organism.chromosome.map(b => if (Math.random <= mutationRate) Math.round(Math.random).toByte else b)
+    val mutatedChromosome: String =
+      organism.chromosome.map(b => if (Math.random <= mutationRate) Organism.getRandomChar else b)
 
     Organism(mutatedChromosome)
   }
@@ -66,8 +63,8 @@ class Population(val populationSize: Integer) {
     * Create a child organism from two parents
     */
   def crossover(parent1: Organism, parent2: Organism): Organism = {
-    val childChromosome: IndexedSeq[Byte] =
-      parent1.chromosome.zip(parent2.chromosome).map { case (p1, p2) => if (Math.random <= mixingRatio) p1 else p2 }
+    val childChromosome: String =
+      parent1.chromosome.zip(parent2.chromosome).map { case (p1, p2) => if (Math.random <= mixingRatio) p1 else p2 }.mkString
 
     Organism(childChromosome)
   }
@@ -78,7 +75,7 @@ class Population(val populationSize: Integer) {
   def select(evaluator: Evaluator): Organism = {
     val numberOfRounds = 10
 
-    val tournament = new Population(numberOfRounds)
+    val tournament = new Population(numberOfRounds, evaluator.solutionLength)
 
     for (i <- 0 to numberOfRounds) {
       val randomOrganism = population(Random.nextInt(populationSize))
