@@ -12,8 +12,8 @@ trait Evolver {
       val fittest = evaluator.fittest(population)
       val fitness = evaluator.fitness(fittest)
 
-      println(f"generation: $generation%02d chromosome: $fittest%s fitness: $fitness%2.2f time: ${LocalTime.now}")
-
+      //println(f"generation: $generation%02d chromosome: $fittest%s fitness: $fitness%2.2f time: ${LocalTime.now}")
+      if (generation % 100 == 0) println(f"generation: $generation%02d fitness: $fitness%2.2f")
       if (fitness >= 1.0)
         fittest
       else {
@@ -27,10 +27,11 @@ trait Evolver {
 }
 
 object Runner extends App with Evolver {
-  val candidate = "This algorithm is awesome, but isn't that great in finding last few symbols"
+  val length = 200
+  val candidate = IndexedSeq.fill(length)(Move.create)
   val evaluator = new Evaluator(candidate)
 
-  val population = new Population(50, candidate.length)
+  val population = new Population(50, length)
   population.populate()
 
   val start = LocalTime.now

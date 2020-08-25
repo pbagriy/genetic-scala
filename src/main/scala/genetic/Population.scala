@@ -37,34 +37,30 @@ class Population(populationSize: Int, solutionSize: Int) {
     */
   def evolve(elitist: Boolean, evaluator: Evaluator): Unit = {
     val eliteOrganism = evaluator.fittest(this)
-    val nextGeneration = for {
-      _       <- 1 until populationSize
+    for {
+      index       <- 1 until populationSize
       parent1 = select(evaluator)
       parent2 = select(evaluator)
       child   = crossover(parent1, parent2)
-    } yield mutate(child)
+      _ = mutate(child)
+      _ = population.insert(index, child)
+    } yield ()
 
-    population.clear()
-    population.addOne(eliteOrganism)
-    population.addAll(nextGeneration)
+    population.insert(0, eliteOrganism)
   }
 
   /**
     * Mutate an organism with a random rate of 0.015
     */
-  def mutate(organism: Organism): Organism = {
-    val mutatedChromosome: String =
-      organism.chromosome.map(b => if (Math.random <= mutationRate) Organism.getRandomChar else b)
-
-    Organism(mutatedChromosome)
-  }
+  def mutate(organism: Organism): Unit =
+      organism.chromosome.insert(Random.nextInt(solutionSize), Move.create)
 
   /**
     * Create a child organism from two parents
     */
   def crossover(parent1: Organism, parent2: Organism): Organism = {
-    val childChromosome: String =
-      parent1.chromosome.zip(parent2.chromosome).map { case (p1, p2) => if (Math.random <= mixingRatio) p1 else p2 }.mkString
+    val childChromosome: mutable.Buffer[Move] =
+      parent1.chromosome.zip(parent2.chromosome).map { case (p1, p2) => if (Math.random <= mixingRatio) p1 else p2 }
 
     Organism(childChromosome)
   }
@@ -73,7 +69,7 @@ class Population(populationSize: Int, solutionSize: Int) {
     * Select an organism from the population using stochastic universal sampling
     */
   def select(evaluator: Evaluator): Organism = {
-    val numberOfRounds = 10
+    val numberOfRounds = 5
 
     val tournament = new Population(numberOfRounds, evaluator.solutionLength)
 

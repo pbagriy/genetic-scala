@@ -1,6 +1,6 @@
 package genetic
 
-class Evaluator(solution: String) {
+class Evaluator(solution: IndexedSeq[Move]) {
 
   def solutionLength: Int = solution.length
 
