@@ -1,5 +1,7 @@
 package genetic
 
+import scala.collection.mutable
+
 class Evaluator(solution: IndexedSeq[Move]) {
 
   def solutionLength: Int = solution.length
@@ -8,7 +10,7 @@ class Evaluator(solution: IndexedSeq[Move]) {
    * Return the fittest organism in a population
    */
 
-  def fittest(population: Population): Organism = population.population.maxBy(fitness)
+  def fittest(population: mutable.Buffer[Organism]): Organism = population.maxBy(fitness)
 
   /**
     * Calculate an organism's fitness by comparing it to the optimal solution

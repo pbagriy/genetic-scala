@@ -9,7 +9,7 @@ trait Evolver {
 
     @scala.annotation.tailrec
     def run(generation: Int): Organism = {
-      val fittest = evaluator.fittest(population)
+      val fittest = evaluator.fittest(population.population)
       val fitness = evaluator.fitness(fittest)
 
       //println(f"generation: $generation%02d chromosome: $fittest%s fitness: $fitness%2.2f time: ${LocalTime.now}")

@@ -9,6 +9,14 @@ class Population(populationSize: Int, solutionSize: Int) {
   val mutationRate = 0.015
   val mixingRatio  = 0.5
 
+  val tournamentPopulation: mutable.Buffer[Organism] = mutable.Buffer.empty[Organism]
+  val tournamentSize = 5
+
+  for (_ <- 0 to tournamentSize) {
+    tournamentPopulation.addOne(Organism.create(solutionSize))
+  }
+
+
   /**
     * Populate with organisms
     */
@@ -21,31 +29,22 @@ class Population(populationSize: Int, solutionSize: Int) {
   }
 
   /**
-    * Return the population size
-    */
-  def size: Integer = population.length
-
-  /**
-    * Add an organism to a particular location in a population
-    */
-  def addOrganism(index: Integer, organism: Organism): Unit = population.insert(index, organism)
-
-  /**
     * Evolve the population by crossover and mutation
     * @param elitist If true, the fittest organism passes to the next generation
     * @param evaluator The evaluator to use
     */
   def evolve(elitist: Boolean, evaluator: Evaluator): Unit = {
-    val eliteOrganism = evaluator.fittest(this)
-    for {
-      index       <- 1 until populationSize
+    val eliteOrganism = evaluator.fittest(this.population)
+    val newGeneration = for {
+      _       <- 1 until populationSize
       parent1 = select(evaluator)
       parent2 = select(evaluator)
       child   = crossover(parent1, parent2)
       _ = mutate(child)
-      _ = population.insert(index, child)
-    } yield ()
+    } yield child
 
+    population.clear()
+    population.addAll(newGeneration)
     population.insert(0, eliteOrganism)
   }
 
@@ -53,7 +52,7 @@ class Population(populationSize: Int, solutionSize: Int) {
     * Mutate an organism with a random rate of 0.015
     */
   def mutate(organism: Organism): Unit =
-      organism.chromosome.insert(Random.nextInt(solutionSize), Move.create)
+      organism.chromosome.update(Random.nextInt(solutionSize), Move.create)
 
   /**
     * Create a child organism from two parents
@@ -69,15 +68,12 @@ class Population(populationSize: Int, solutionSize: Int) {
     * Select an organism from the population using stochastic universal sampling
     */
   def select(evaluator: Evaluator): Organism = {
-    val numberOfRounds = 5
 
-    val tournament = new Population(numberOfRounds, evaluator.solutionLength)
-
-    for (i <- 0 to numberOfRounds) {
-      val randomOrganism = population(Random.nextInt(populationSize))
-      tournament.addOrganism(i, randomOrganism)
+    for (i <- 0 to tournamentSize) {
+      val randomOrganism = population(Random.nextInt(tournamentSize))
+      tournamentPopulation.update(i, randomOrganism)
     }
 
-    evaluator.fittest(tournament)
+    evaluator.fittest(tournamentPopulation)
   }
 }
